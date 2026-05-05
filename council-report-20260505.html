@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Council — Niche IA pour entrepreneurs</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; color: #1a1a1a; line-height: 1.6; }
+  .header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 32px 48px; }
+  .header h1 { font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .header h2 { font-size: 22px; font-weight: 700; color: #111; max-width: 680px; }
+  .header .meta { margin-top: 10px; font-size: 12px; color: #9ca3af; }
+  .container { max-width: 900px; margin: 40px auto; padding: 0 24px; }
+
+  /* Verdict card */
+  .verdict-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; margin-bottom: 32px; }
+  .verdict-card .section { padding: 28px 32px; border-bottom: 1px solid #f3f4f6; }
+  .verdict-card .section:last-child { border-bottom: none; }
+  .verdict-card .section h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+  .verdict-card .section p, .verdict-card .section li { font-size: 15px; color: #374151; }
+  .verdict-card .section ul { padding-left: 20px; }
+  .verdict-card .section li { margin-bottom: 6px; }
+  .agrees h3 { color: #059669; }
+  .clashes h3 { color: #d97706; }
+  .blindspots h3 { color: #7c3aed; }
+  .rec h3 { color: #1d4ed8; }
+  .one-thing { background: #1a1a1a; }
+  .one-thing h3 { color: #facc15; }
+  .one-thing p { color: #f3f4f6; font-size: 16px; font-weight: 500; }
+
+  /* Alignment grid */
+  .align-grid { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 28px 32px; margin-bottom: 32px; }
+  .align-grid h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .advisor-cell { text-align: center; }
+  .advisor-badge { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; margin: 0 auto 6px; }
+  .con { background: #fee2e2; color: #b91c1c; }
+  .fpt { background: #dbeafe; color: #1d4ed8; }
+  .exp { background: #d1fae5; color: #065f46; }
+  .out { background: #fef3c7; color: #92400e; }
+  .exe { background: #ede9fe; color: #5b21b6; }
+  .advisor-name { font-size: 10px; color: #6b7280; font-weight: 600; }
+  .advisor-stance { font-size: 11px; color: #374151; margin-top: 4px; }
+  .peer-votes { margin-top: 16px; border-top: 1px solid #f3f4f6; padding-top: 16px; }
+  .peer-votes p { font-size: 12px; color: #6b7280; margin-bottom: 8px; font-weight: 600; }
+  .vote-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 12px; color: #374151; }
+  .vote-badge { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+
+  /* Collapsible sections */
+  details { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+  summary { padding: 18px 24px; font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: #374151; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "▸"; font-size: 12px; color: #9ca3af; transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(90deg); }
+  .details-body { padding: 0 24px 24px; font-size: 14px; color: #4b5563; line-height: 1.7; border-top: 1px solid #f3f4f6; padding-top: 20px; }
+
+  .label { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-right: 8px; }
+  .label-con { background: #fee2e2; color: #b91c1c; }
+  .label-fpt { background: #dbeafe; color: #1d4ed8; }
+  .label-exp { background: #d1fae5; color: #065f46; }
+  .label-out { background: #fef3c7; color: #92400e; }
+  .label-exe { background: #ede9fe; color: #5b21b6; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 12px; }
+  footer { text-align: center; padding: 40px 24px; font-size: 12px; color: #9ca3af; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LLM Council — Verdict</h1>
+  <h2>Dois-je me nicher sur les agents IA pour entrepreneurs, ou garder une offre IA généraliste ?</h2>
+  <div class="meta">5 advisors · 5 peer reviews · 1 chairman · 5 mai 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- VERDICT -->
+  <div class="verdict-card">
+    <div class="section agrees">
+      <h3>Où le conseil s'accorde</h3>
+      <ul>
+        <li><strong>La spécificité du problème prime sur la spécificité de l'audience.</strong> Tous les conseillers, indépendamment de leur angle, convergent : le niche est un problème, pas un titre de poste. "Entrepreneurs" n'est pas un niche. "Fondateurs qui passent 4h/semaine à relancer des prospects" l'est.</li>
+        <li><strong>La réponse exige un test, pas un débat.</strong> Aucun conseiller ne recommande de continuer à théoriser. Tous pointent vers l'outreach comme forcing function.</li>
+        <li><strong>"Entrepreneurs" est invendable en tant que segment.</strong> Un vendeur de bougies et un fondateur Série A partagent une auto-identité, pas un problème, pas un budget, pas un processus d'achat.</li>
+      </ul>
+    </div>
+    <div class="section clashes">
+      <h3>Où le conseil diverge</h3>
+      <p><strong>SME directors d'abord vs. fondateurs d'abord.</strong> L'Exécuteur dit d'utiliser l'audience existante (directors) pour valider. Deux reviewers signalent l'erreur : si l'hypothèse porte sur les fondateurs, tester sur les directors produit des données sur la mauvaise population. Resolution : ces deux objectifs sont des expériences séparées — utiliser l'audience warm pour valider la réalité du problème, et tester en cold sur les fondateurs pour mesurer le taux de réponse. Simultanément, pas séquentiellement.</p>
+      <p style="margin-top:12px;"><strong>Positionnement par problème vs. par audience.</strong> Le Penseur en Premiers Principes dit de définir l'outcome mesurable et laisser l'audience s'auto-sélectionner (inbound). Le Contrarian dit de cibler directement un sous-segment (outbound). À votre stade — sans process répétable ni études de cas — l'outbound donne du signal plus vite.</p>
+    </div>
+    <div class="section blindspots">
+      <h3>Angles morts révélés par la peer review</h3>
+      <ul>
+        <li><strong>Densité concurrentielle.</strong> Aucun conseiller n'a demandé où la compétition est la plus faible par rapport à la willingness to pay. "Agents IA pour fondateurs" est déjà encombré. Un niche problème + industrie peut avoir beaucoup moins de concurrence et des taux de closing bien supérieurs.</li>
+        <li><strong>Qualité de l'acheteur et LTV.</strong> Les fondateurs sont notoirement de mauvais acheteurs : haute curiosité, faible urgence, cycles longs, pas d'autorité de budget. Les ops managers de PME ont souvent un budget défini et des raisons de renouveler. Le bon niche n'est pas votre meilleure cible d'acquisition — c'est votre meilleure unité de composition à long terme.</li>
+        <li><strong>Modèle de monétisation avant le niche.</strong> Service productisé vs. retainer vs. SaaS change totalement le math du client idéal. Un service productisé récompense les acheteurs à fort volume et faible friction. Un retainer récompense des acheteurs avec une complexité opérationnelle continue. Le niche doit correspondre au modèle économique que vous construisez.</li>
+        <li><strong>Distribution et crédibilité existante.</strong> Le meilleur niche n'est pas le plus logique — c'est celui adjacent à là où vous avez déjà des relations chaudes et des résultats démontrés. Mauvais niche + accès warm bat niche parfait + cold outreach à votre stade actuel.</li>
+      </ul>
+    </div>
+    <div class="section rec">
+      <h3>La recommandation</h3>
+      <p><strong>Nichez par problème et outcome mesurable — pas par identité d'audience. Puis laissez le marché révéler qui répond le plus vite et paye le mieux.</strong></p>
+      <p style="margin-top:10px;">Structure concrète : identifiez le problème le plus concret que vous avez déjà résolu ou pouvez résoudre le plus crédiblement. Nommez l'état avant, l'état après, et le delta temporel. "Qualification de prospects automatisée : de 3 jours de revue manuelle à 3 heures." C'est votre ancre de positionnement — pas "agents IA pour entrepreneurs."</p>
+      <p style="margin-top:10px;">Ensuite, testez deux listes en parallèle sur 14 jours : (1) consultants solo et agences facturant +8k€/mois (contrainte de capacité, ROI clair) ; (2) ops ou sales directors de PME 10-50 personnes (autorité d'achat, budgets définis, incentives de renouvellement). Mesurez taux de réponse, conversion en meeting, et délai de closing. Ne choisissez pas votre niche avant d'avoir ces données.</p>
+      <p style="margin-top:10px;">L'offre IA généraliste n'est pas votre ennemi — c'est votre fallback et votre upsell. Le niche est votre point d'entrée.</p>
+    </div>
+    <div class="section one-thing">
+      <h3>La seule chose à faire en premier</h3>
+      <p>Rédigez un message d'outreach — pas une séquence, pas une campagne — construit autour d'un seul problème spécifique que vous avez déjà résolu, avec un état avant et un état après nommés. Envoyez-le à 20 personnes qui correspondent au profil de qui vous a déjà payé ou qui vous paierait en premier. Comptez les réponses dans les 72 heures. Ce chiffre vous apprend plus que l'intégralité de ce conseil.</p>
+    </div>
+  </div>
+
+  <!-- ALIGNMENT GRID -->
+  <p class="section-title">Positions des conseillers</p>
+  <div class="align-grid">
+    <h3>Vue d'ensemble — Où chacun a pointé</h3>
+    <div class="grid">
+      <div class="advisor-cell">
+        <div class="advisor-badge con">C</div>
+        <div class="advisor-name">Contrarian</div>
+        <div class="advisor-stance">Erreur structurelle. Pas de données = théorie sans preuves. Test ultra-spécifique en cold.</div>
+      </div>
+      <div class="advisor-cell">
+        <div class="advisor-badge fpt">FP</div>
+        <div class="advisor-name">First Principles</div>
+        <div class="advisor-stance">Mauvais axe. Spécificité du problème &gt; audience. Budget line = vrai niche.</div>
+      </div>
+      <div class="advisor-cell">
+        <div class="advisor-badge exp">EX</div>
+        <div class="advisor-name">Expansionist</div>
+        <div class="advisor-stance">Question trop petite. Psychographique &gt; démographique. "Scaling sans recrutement" = play platforme.</div>
+      </div>
+      <div class="advisor-cell">
+        <div class="advisor-badge out">O</div>
+        <div class="advisor-name">Outsider</div>
+        <div class="advisor-stance">Les deux options sont des abstractions. Commencez par le problème déjà résolu. 20 contacts.</div>
+      </div>
+      <div class="advisor-cell">
+        <div class="advisor-badge exe">E</div>
+        <div class="advisor-name">Executor</div>
+        <div class="advisor-stance">Arrêtez de débattre. 3 pain points × 20 contacts × 14 jours. Utilisez l'audience existante.</div>
+      </div>
+    </div>
+    <div class="peer-votes">
+      <p>Votes peer review — "Réponse la plus forte"</p>
+      <div class="vote-row"><div class="vote-badge fpt" style="background:#dbeafe;color:#1d4ed8">FP</div> 1 vote (Reviewer 1 — "Budget line le plus précis")</div>
+      <div class="vote-row"><div class="vote-badge con" style="background:#fee2e2;color:#b91c1c">C</div> 2 votes (Reviewers 2, 3 — "Nomme l'erreur structurelle le mieux")</div>
+      <div class="vote-row"><div class="vote-badge out" style="background:#fef3c7;color:#92400e">O</div> 2 votes (Reviewers 4, 5 — "Reframe le plus actionnable")</div>
+    </div>
+  </div>
+
+  <!-- ADVISOR RESPONSES (collapsible) -->
+  <p class="section-title">Réponses complètes des conseillers</p>
+
+  <details>
+    <summary><span class="label label-con">Contrarian</span> "Entrepreneurs" est une auto-identité, pas un segment</summary>
+    <div class="details-body">
+      <p>L'utilisateur a déjà diagnostiqué le problème : "entrepreneurs" est trop vague. Mais il traite ça comme un ajustement mineur de positionnement alors que c'est un échec structurel.</p>
+      <p style="margin-top:12px;">Voici ce qui va tuer ceci : "Entrepreneurs" n'est pas un segment — c'est une auto-identité. Un vendeur de bougies de 22 ans et un fondateur Série A se considèrent tous deux comme des entrepreneurs. Ils n'ont rien en commun : budgets différents, pain points différents, processus d'achat différents, signaux de confiance différents. Vous ne pouvez pas écrire du copy qui convertit les deux.</p>
+      <p style="margin-top:12px;">Le défaut plus profond : l'utilisateur niche par identité plutôt que par problème. Les "fondateurs" n'achètent pas des agents IA. Les personnes qui se noient dans un goulot d'étranglement opérationnel spécifique achètent des agents IA. Le niche doit être la douleur, pas la persona.</p>
+      <p style="margin-top:12px;">Ce qui manque : un forcing function. L'utilisateur n'a pas encore vendu 10-20 clients via un process répétable. C'est la seule donnée qui révèle le vrai niche. Le niche émergera des clients qui se closent le plus vite, paient le plus, et réfèrent d'autres. Test : outreach ultra-spécifique à un sous-segment (ex. consultants solo facturant +10k€/mois, contraints en capacité), 30 jours, mesurez le taux de réponse.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="label label-fpt">First Principles</span> Vous posez la mauvaise question</summary>
+    <div class="details-body">
+      <p>La question suppose que l'axe de décision est "audience étroite vs. large." C'est le mauvais axe entièrement.</p>
+      <p style="margin-top:12px;">La vraie variable est la spécificité du problème, pas la spécificité de l'audience. Une offre vague pour des entrepreneurs échoue pour la même raison qu'une offre vague pour des "PMEs" : ni l'une ni l'autre ne nomme la douleur. "Entrepreneurs" n'est pas un niche — c'est un démographique. Un niche est un problème-moment : le fondateur qui ne peut pas qualifier des leads assez vite pour atteindre son objectif de revenus avant que le runway se termine.</p>
+      <p style="margin-top:12px;">Première question : quel tâche cognitive répétable, une fois automatisée, produit un outcome pour lequel l'acheteur a déjà une ligne budgétaire ? Cette ligne budgétaire est le vrai niche. Pas la personne — le problème avec les dépenses existantes.</p>
+      <p style="margin-top:12px;">Ce qui manque : un outcome nommé et mesurable. Pas "agents IA pour entrepreneurs" mais "agents IA qui réduisent votre temps de qualification des ventes de 3 jours à 3 heures." L'audience s'auto-sélectionne depuis cette affirmation.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="label label-exp">Expansionist</span> La question est trop petite — play plateforme</summary>
+    <div class="details-body">
+      <p>La question elle-même est trop petite. Vous débattez "niche vs. large" quand la vraie question est : quelle est la plus grande catégorie que vous pourriez posséder ?</p>
+      <p style="margin-top:12px;">"Entrepreneurs" n'est pas un niche — c'est un démographique. La vraie opportunité est de vous positionner autour d'un problème si aigu que le type d'acheteur devient non pertinent. Pensez : "agents IA pour les fondateurs au premier recrutement qui ne peuvent pas se permettre une équipe ops." Maintenant vous avez un problème, un moment, et un pain point. C'est une catégorie.</p>
+      <p style="margin-top:12px;">Ce que tout le monde manque : les agents IA sont encore pre-chasm pour la plupart des acheteurs. La personne prête à adopter tôt et payer vrai est un psychographique spécifique (haute agency, déjà en train d'expérimenter, frustré par la fragmentation des outils), pas un démographique.</p>
+      <p style="margin-top:12px;">L'upside non pricé : si vous construisez une réputation comme la personne qui résout le problème "scaling sans recrutement" avec des agents IA, vous devenez une infrastructure pour une génération d'entreprises. C'est un play plateforme. Test : deux landing pages — "pour les fondateurs" vs "scaling sans recruter" — mesurez la conversion qualifiée.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="label label-out">Outsider</span> Vous choisissez entre deux abstractions</summary>
+    <div class="details-body">
+      <p>Les deux options telles que formulées sont fausses : vous choisissez entre deux abstractions. "Entrepreneurs" n'est pas un niche. "SME directors" n'est pas un niche. "L'automatisation IA" n'est pas une offre. Ce sont des labels démographiques, pas des descriptions d'une douleur.</p>
+      <p style="margin-top:12px;">La vraie question à laquelle vous n'avez pas encore répondu : quel est le problème récurrent et spécifique qui rend le mardi de quelqu'un horrible, que votre agent résout pour le mercredi ? C'est le niche. Pas le titre de poste. Le problème.</p>
+      <p style="margin-top:12px;">Ce qui manque : un avant/après spécifique. Pas "agents IA pour fondateurs" mais "fondateurs qui passent 4 heures par semaine à relancer des prospects utilisent ceci pour récupérer ces heures." C'est vendable. C'est cherchable. C'est partageable.</p>
+      <p style="margin-top:12px;">Commencez par le problème, pas la persona. La persona émerge de qui a ce problème le plus acutement.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="label label-exe">Executor</span> Arrêtez de débattre — faites le test cette semaine</summary>
+    <div class="details-body">
+      <p>La peur qu'"entrepreneurs" soit trop vague est correcte. Arrêtez de débattre du concept et faites le test cette semaine.</p>
+      <p style="margin-top:12px;">Action du lundi matin : choisissez trois pain points spécifiques de fondateurs que vous pouvez nommer sans réfléchir. Pas "automatisation IA" — quelque chose comme "fondateurs passant 6 heures par semaine à qualifier manuellement des leads" ou "opérateurs solo noyés dans les emails d'onboarding clients." Écrivez un message d'outreach pour chacun. Envoyez 20 DMs ou emails par pain point à des personnes qui correspondent visiblement à ce problème. Suivez le taux de réponse et les appels réservés sur 14 jours. Celui qui convertit devient votre niche.</p>
+      <p style="margin-top:12px;">Ce qui manque : un ennemi nommé — le gouffre de temps ou le process cassé que l'agent tue. "Agents IA pour entrepreneurs" est une catégorie. "Remplacez votre triage d'inbox du lundi matin avec un agent qui le gère pendant la nuit" est une offre.</p>
+      <p style="margin-top:12px;">Commencez avec votre audience existante de SME directors car vous y avez déjà accès. Utilisez-les pour valider le cadrage du problème en premier, puis décidez si les fondateurs sont le bon segment basé sur où se situe vraiment la douleur.</p>
+    </div>
+  </details>
+
+  <!-- PEER REVIEWS (collapsible) -->
+  <p class="section-title">Peer reviews</p>
+
+  <details>
+    <summary>Reviewer 1 — Plus forte : D (FP) · Angle mort : E (Executor)</summary>
+    <div class="details-body">
+      <p><strong>Plus forte : D.</strong> Le seul qui localise la vraie unité d'analyse — la ligne budgétaire, pas la persona. "Quelle tâche cognitive répétable a déjà des dépenses existantes ?" est une question de premiers principes qui coupe toute la confusion identité-vs-problème. Logique la plus serrée, cadrage le plus actionnable.</p>
+      <p style="margin-top:12px;"><strong>Angle mort : E.</strong> Conseille de "commencer avec les SME directors existants" parce qu'ils sont "plus susceptibles de répondre" — ce qui active un convenience sampling qui invalide le test. Si l'hypothèse est sur les fondateurs, tester sur un autre segment produit des données sans valeur.</p>
+      <p style="margin-top:12px;"><strong>Ce que tous ont manqué : densité concurrentielle.</strong> Aucun n'a demandé où la compétition est la plus faible par rapport à la willingness to pay. Une offre parfaitement positionnée dans un marché saturé perd quand même.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Reviewer 2 — Plus forte : C (Contrarian) · Angle mort : E (Executor)</summary>
+    <div class="details-body">
+      <p><strong>Plus forte : C.</strong> Nomme l'erreur stratégique réelle avec précision — nicher par identité plutôt que par problème — et ajoute un forcing function (10-20 closes répétables) que les autres ignorent. Le seul qui explique pourquoi le cadrage actuel échoue structurellement.</p>
+      <p style="margin-top:12px;"><strong>Angle mort : E.</strong> Tactiquement correct mais stratégiquement creux. "Faites le test cette semaine" sans diagnostiquer l'erreur identité-vs-problème signifie que le test lui-même mesure probablement la mauvaise variable. Action rapide sur une hypothèse défaillante = garbage rapide.</p>
+      <p style="margin-top:12px;"><strong>Ce que tous ont manqué : qualité de l'acheteur.</strong> Les fondateurs sont notoirement de mauvais acheteurs — haute curiosité, faible closing, longs cycles, pas d'autorité de budget. Les SME directors/managers ont souvent une vraie autorité d'achat. La décision de niche, c'est aussi "qui signe les contrats et paye à temps."</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Reviewer 3 — Plus forte : C (Contrarian) · Angle mort : E (Executor)</summary>
+    <div class="details-body">
+      <p><strong>Plus forte : C.</strong> La segmentation basée sur l'identité produit un copy invendable. L'illustration vendeur de bougies vs fondateur Série A est concrète. Identifie aussi correctement le vrai problème : pas de données clients encore = théorie de positionnement prématurée.</p>
+      <p style="margin-top:12px;"><strong>Angle mort : E.</strong> 60 messages sans hypothèse de ciblage clair génère du bruit plus vite. Le volume sans direction n'est pas un raccourci.</p>
+      <p style="margin-top:12px;"><strong>Ce que tous ont manqué : modèle de monétisation.</strong> Service productisé, retainer mensuel, et SaaS licensing ne sont pas interchangeables. Chacun récompense un profil client différent. La sélection du niche sans connaître l'économie unitaire est du positionnement sur du sable.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Reviewer 4 — Plus forte : B (Outsider) · Angle mort : A (Expansionist)</summary>
+    <div class="details-body">
+      <p><strong>Plus forte : B.</strong> Reframe correctement toute la question — niche = problème d'abord, test le moins cher et le plus rapide, discipline correcte : avant/après spécifique d'abord, persona ensuite. Pas de mouvement gaspillé.</p>
+      <p style="margin-top:12px;"><strong>Angle mort : A.</strong> "Psychographique pre-chasm" est sophistiqué mais opérationnellement inutile. Comment trouvez-vous et ciblez-vous quelqu'un défini par un état d'esprit ? Vous ne pouvez pas acheter cette liste.</p>
+      <p style="margin-top:12px;"><strong>Ce que tous ont manqué : LTV et économie de rétention.</strong> Quel type de client renouvelle, s'étend, et réfère ? Un fondateur peut se closer vite mais churner quand le prochain outil brillant apparaît. Un ops manager de PME peut se closer plus lentement mais payer 18 mois et envoyer des références. Le niche = business à composition, pas juste acquisition.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Reviewer 5 — Plus forte : B (Outsider) · Angle mort : A (Expansionist)</summary>
+    <div class="details-body">
+      <p><strong>Plus forte : B.</strong> "Commencez par le problème concret déjà résolu" coupe tout le bruit. Si vous avez déjà résolu quelque chose de spécifique, le niche se révèle de lui-même. Les 20 contacts sont empiriques, pas théoriques.</p>
+      <p style="margin-top:12px;"><strong>Angle mort : A.</strong> "Scaling without headcount" sonne bien mais est exactement la vagueness que l'utilisateur essaie d'échapper. Le ciblage psychographique pre-chasm et les landing pages A/B sont une optimisation prématurée pour quelqu'un qui n'a pas encore validé une seule offre.</p>
+      <p style="margin-top:12px;"><strong>Ce que tous ont manqué : distribution et accès chaud.</strong> Le meilleur niche n'est pas le plus logique — c'est celui adjacent à là où vous avez déjà de la crédibilité et des relations chaudes. Mauvais niche + accès warm bat niche parfait + cold outreach à votre stade actuel. Avant de sélectionner un niche en premiers principes, faites l'inventaire de là où vous avez déjà de la crédibilité.</p>
+    </div>
+  </details>
+
+</div>
+
+<footer>
+  LLM Council · 5 mai 2026 · Adapté de la méthodologie LLM Council d'Andrej Karpathy<br>
+  Rapport généré par Claude Code + llm-council skill
+</footer>
+
+</body>
+</html>
