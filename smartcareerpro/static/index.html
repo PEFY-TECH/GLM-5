@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartCareerPro — AI Career Intelligence</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <style>
+    /* ── Design tokens ────────────────────────────────────── */
+    :root {
+      --bg:        #0d1117;
+      --bg2:       #161b22;
+      --bg3:       #21262d;
+      --border:    #30363d;
+      --border2:   #3d444d;
+      --text:      #e6edf3;
+      --text2:     #8b949e;
+      --text3:     #656d76;
+      --primary:   #7c3aed;
+      --primary2:  #9f67fa;
+      --primary3:  #ddd6fe;
+      --accent:    #06b6d4;
+      --accent2:   #67e8f9;
+      --success:   #3fb950;
+      --warning:   #d29922;
+      --error:     #f85149;
+      --grad:      linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #06b6d4 100%);
+      --radius:    12px;
+      --radius-sm: 6px;
+    }
+
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Header ──────────────────────────────────────────── */
+    header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--grad);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo-text span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .badge {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    /* ── Nav tabs ────────────────────────────────────────── */
+    nav {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      gap: 2px;
+      overflow-x: auto;
+    }
+    nav::-webkit-scrollbar { height: 0; }
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text2);
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+      user-select: none;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--primary2); border-color: var(--primary2); }
+    .tab-icon { font-size: 16px; }
+
+    /* ── Main layout ─────────────────────────────────────── */
+    main {
+      flex: 1;
+      padding: 28px 32px;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Panels ──────────────────────────────────────────── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Section heading ─────────────────────────────────── */
+    .panel-header { margin-bottom: 24px; }
+    .panel-header h2 { font-size: 22px; font-weight: 700; }
+    .panel-header p { color: var(--text2); margin-top: 4px; font-size: 14px; }
+
+    /* ── Cards ───────────────────────────────────────────── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+    }
+
+    /* ── Form elements ───────────────────────────────────── */
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 6px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    textarea, input[type="text"], select {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color .15s;
+      outline: none;
+    }
+    textarea:focus, input:focus { border-color: var(--primary); }
+    textarea { min-height: 180px; }
+    .field { margin-bottom: 16px; }
+    .row { display: flex; gap: 14px; }
+    .row .field { flex: 1; }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s, transform .1s;
+    }
+    button:active { transform: scale(.98); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #6d28d9; }
+    .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { border-color: var(--border2); }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--border2); }
+
+    /* ── Output area ─────────────────────────────────────── */
+    .output-wrap { margin-top: 22px; }
+    .output-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--text3);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .output-label .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 1.4s ease-in-out infinite;
+      display: none;
+    }
+    .output-label .dot.active { display: block; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+    .output {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      min-height: 80px;
+      font-size: 14px;
+      line-height: 1.75;
+      overflow-wrap: break-word;
+    }
+    .output.hidden { display: none; }
+    .placeholder {
+      color: var(--text3);
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* ── Markdown styles inside output ───────────────────── */
+    .output h1, .output h2, .output h3, .output h4 {
+      color: var(--text);
+      margin: 18px 0 8px;
+      font-weight: 700;
+    }
+    .output h1 { font-size: 1.3em; }
+    .output h2 { font-size: 1.15em; }
+    .output h3 { font-size: 1.05em; color: var(--primary3); }
+    .output p { margin: 0 0 10px; }
+    .output ul, .output ol { padding-left: 22px; margin-bottom: 10px; }
+    .output li { margin-bottom: 4px; }
+    .output strong { color: var(--text); }
+    .output em { color: var(--accent2); }
+    .output code {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: .88em;
+      font-family: "SF Mono", Consolas, monospace;
+      color: var(--accent2);
+    }
+    .output pre {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin-bottom: 10px;
+    }
+    .output pre code { background: none; border: none; padding: 0; color: var(--text); }
+    .output blockquote {
+      border-left: 3px solid var(--primary);
+      padding-left: 14px;
+      color: var(--text2);
+      margin: 10px 0;
+    }
+    .output hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .output table { border-collapse: collapse; width: 100%; margin-bottom: 10px; }
+    .output th, .output td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .output th { background: var(--bg3); font-weight: 600; }
+
+    /* ── Chat interface ──────────────────────────────────── */
+    .chat-window {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      height: 440px;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 14px;
+      scroll-behavior: smooth;
+    }
+    .chat-window::-webkit-scrollbar { width: 6px; }
+    .chat-window::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    .chat-empty {
+      margin: auto;
+      text-align: center;
+      color: var(--text3);
+      font-size: 14px;
+    }
+    .chat-empty .icon { font-size: 36px; margin-bottom: 10px; }
+    .msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; align-items: flex-start; }
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .msg.user .msg-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+    .msg.assistant .msg-bubble {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+    .msg.assistant .msg-bubble h1,
+    .msg.assistant .msg-bubble h2,
+    .msg.assistant .msg-bubble h3 { margin: 10px 0 6px; font-weight: 700; }
+    .msg.assistant .msg-bubble p { margin: 0 0 6px; }
+    .msg.assistant .msg-bubble ul, .msg.assistant .msg-bubble ol { padding-left: 18px; margin-bottom: 6px; }
+    .msg.assistant .msg-bubble strong { color: var(--primary3); }
+    .msg-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; font-weight: 600; }
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .chat-input-row textarea {
+      flex: 1;
+      min-height: 44px;
+      max-height: 140px;
+      resize: none;
+    }
+    .chat-send {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      justify-content: center;
+      flex-shrink: 0;
+      background: var(--primary);
+      color: #fff;
+    }
+    .chat-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .typing-indicator {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      border-bottom-left-radius: 3px;
+      width: fit-content;
+    }
+    .typing-indicator.active { display: flex; }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text3);
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    /* ── Split layout for JD Matcher ────────────────────── */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── Model badge ─────────────────────────────────────── */
+    .model-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text3);
+    }
+    .model-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 14px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      background: var(--bg2);
+    }
+    footer a { color: var(--text2); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 700px) {
+      header, nav, main { padding-left: 16px; padding-right: 16px; }
+      .split { grid-template-columns: 1fr; }
+      .row { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ Header ══════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎯</div>
+    <div>
+      <div class="logo-text"><span>SmartCareerPro</span></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="model-indicator">
+      <div class="model-dot"></div>
+      <span id="model-name">GLM-5</span>
+    </div>
+    <span class="badge">AI Career Intelligence</span>
+  </div>
+</header>
+
+<!-- ══ Nav ════════════════════════════════════════════════════════════════ -->
+<nav>
+  <div class="tab active" data-tab="resume">
+    <span class="tab-icon">📄</span> Resume Analyzer
+  </div>
+  <div class="tab" data-tab="improve">
+    <span class="tab-icon">✏️</span> Resume Improver
+  </div>
+  <div class="tab" data-tab="interview">
+    <span class="tab-icon">🎤</span> Interview Coach
+  </div>
+  <div class="tab" data-tab="career">
+    <span class="tab-icon">🗺️</span> Career Advisor
+  </div>
+  <div class="tab" data-tab="skills">
+    <span class="tab-icon">🔬</span> Skills Gap
+  </div>
+  <div class="tab" data-tab="jd">
+    <span class="tab-icon">🎯</span> JD Matcher
+  </div>
+</nav>
+
+<!-- ══ Main ═══════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ─── Resume Analyzer ─────────────────────────────────────────────── -->
+  <div class="panel active" id="panel-resume">
+    <div class="panel-header">
+      <h2>📄 Resume Analyzer</h2>
+      <p>Paste your resume below and get expert AI feedback with actionable improvement suggestions.</p>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>Your Resume</label>
+        <textarea id="ra-resume" placeholder="Paste your resume content here...&#10;&#10;Include work experience, education, skills, and any other sections."></textarea>
+      </div>
+      <div class="field">
+        <label>Target Role <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label>
+        <input type="text" id="ra-role" placeholder="e.g. Senior Software Engineer at a fintech startup" />
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="analyzeResume()">
+          <span>🔍</span> Analyze Resume
+        </button>
+        <button class="btn-ghost" onclick="clearPanel('resume')">Clear</button>
+      </div>
+      <div class="output-wrap" id="ra-out-wrap" style="display:none">
+        <div class="output-label">
+          <div class="dot" id="ra-dot"></div>
+          Analysis
+        </div>
+        <div class="output" id="ra-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Resume Improver ──────────────────────────────────────────────── -->
+  <div class="panel" id="panel-improve">
+    <div class="panel-header">
+      <h2>✏️ Resume Improver</h2>
+      <p>Transform your resume with stronger action verbs, quantified achievements, and ATS optimization.</p>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>Your Resume</label>
+        <textarea id="ri-resume" placeholder="Paste your resume content here..."></textarea>
+      </div>
+      <div class="field">
+        <label>Target Role <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label>
+        <input type="text" id="ri-role" placeholder="e.g. Product Manager, healthcare industry" />
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="improveResume()">
+          <span>✨</span> Improve Resume
+        </button>
+        <button class="btn-ghost" onclick="clearPanel('improve')">Clear</button>
+      </div>
+      <div class="output-wrap" id="ri-out-wrap" style="display:none">
+        <div class="output-label">
+          <div class="dot" id="ri-dot"></div>
+          Improved Resume
+        </div>
+        <div class="output" id="ri-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Interview Coach ──────────────────────────────────────────────── -->
+  <div class="panel" id="panel-interview">
+    <div class="panel-header">
+      <h2>🎤 Interview Coach</h2>
+      <p>Practice with an AI interviewer who asks role-appropriate questions and gives expert feedback.</p>
+    </div>
+    <div class="card">
+      <div class="chat-controls">
+        <button class="btn-secondary" onclick="startChat('interview')">
+          <span>▶️</span> New Session
+        </button>
+        <button class="btn-ghost" onclick="endInterview()">
+          📋 End &amp; Get Feedback
+        </button>
+      </div>
+      <div class="chat-window" id="cw-interview">
+        <div class="chat-empty">
+          <div class="icon">🎤</div>
+          <div>Click <strong>New Session</strong> to start your mock interview</div>
+        </div>
+      </div>
+      <div id="ti-interview" class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+      <div class="chat-input-row">
+        <textarea id="ci-interview" placeholder="Type your answer and press Enter (Shift+Enter for newline)..." rows="2" disabled></textarea>
+        <button class="btn-primary chat-send" id="cs-interview" onclick="sendChat('interview')" disabled>➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Career Advisor ───────────────────────────────────────────────── -->
+  <div class="panel" id="panel-career">
+    <div class="panel-header">
+      <h2>🗺️ Career Advisor</h2>
+      <p>Get personalized career strategy, transition guidance, and professional development advice.</p>
+    </div>
+    <div class="card">
+      <div class="chat-controls">
+        <button class="btn-secondary" onclick="startChat('career')">
+          <span>▶️</span> New Session
+        </button>
+      </div>
+      <div class="chat-window" id="cw-career">
+        <div class="chat-empty">
+          <div class="icon">🗺️</div>
+          <div>Click <strong>New Session</strong> to start your career coaching session</div>
+        </div>
+      </div>
+      <div id="ti-career" class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+      <div class="chat-input-row">
+        <textarea id="ci-career" placeholder="Ask your career question or describe your situation..." rows="2" disabled></textarea>
+        <button class="btn-primary chat-send" id="cs-career" onclick="sendChat('career')" disabled>➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Skills Gap ───────────────────────────────────────────────────── -->
+  <div class="panel" id="panel-skills">
+    <div class="panel-header">
+      <h2>🔬 Skills Gap Analyzer</h2>
+      <p>Discover exactly what skills you need to develop to land your target role, with a prioritized learning path.</p>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>Target Role</label>
+        <input type="text" id="sg-role" placeholder="e.g. Staff Machine Learning Engineer at a top tech company" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Current Skills &amp; Experience</label>
+          <textarea id="sg-skills" style="min-height:150px" placeholder="Describe your current background:&#10;• Years of experience&#10;• Programming languages / tools&#10;• Industries you've worked in&#10;• Current job title&#10;• Key projects"></textarea>
+        </div>
+        <div class="field">
+          <label>Experience Level</label>
+          <select id="sg-level">
+            <option value="">Select level...</option>
+            <option>Entry Level (0–2 years)</option>
+            <option>Mid-Level (3–5 years)</option>
+            <option>Senior (6–9 years)</option>
+            <option>Staff / Principal (10+ years)</option>
+            <option>Career Changer</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="analyzeSkills()">
+          <span>🔬</span> Analyze Skills Gap
+        </button>
+        <button class="btn-ghost" onclick="clearPanel('skills')">Clear</button>
+      </div>
+      <div class="output-wrap" id="sg-out-wrap" style="display:none">
+        <div class="output-label">
+          <div class="dot" id="sg-dot"></div>
+          Skills Gap Report
+        </div>
+        <div class="output" id="sg-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── JD Matcher ───────────────────────────────────────────────────── -->
+  <div class="panel" id="panel-jd">
+    <div class="panel-header">
+      <h2>🎯 JD Matcher</h2>
+      <p>See exactly how well your resume matches a job description, with copy-paste tailoring suggestions.</p>
+    </div>
+    <div class="card">
+      <div class="split">
+        <div class="field">
+          <label>Your Resume</label>
+          <textarea id="jd-resume" style="min-height:260px" placeholder="Paste your resume here..."></textarea>
+        </div>
+        <div class="field">
+          <label>Job Description</label>
+          <textarea id="jd-desc" style="min-height:260px" placeholder="Paste the full job description here..."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="matchJD()">
+          <span>🎯</span> Analyze Match
+        </button>
+        <button class="btn-ghost" onclick="clearPanel('jd')">Clear</button>
+      </div>
+      <div class="output-wrap" id="jd-out-wrap" style="display:none">
+        <div class="output-label">
+          <div class="dot" id="jd-dot"></div>
+          Match Analysis
+        </div>
+        <div class="output" id="jd-output"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ Footer ═════════════════════════════════════════════════════════════ -->
+<footer>
+  SmartCareerPro &nbsp;·&nbsp; Powered by <a href="https://github.com/zai-org/GLM-5" target="_blank">GLM-5</a>
+  &nbsp;·&nbsp; <a href="/docs" target="_blank">API Docs</a>
+</footer>
+
+<script>
+  // ── Tabs ─────────────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── SSE streaming fetch ───────────────────────────────────────────────────
+  async function streamFetch(url, body, onChunk) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') return;
+        try { onChunk(JSON.parse(payload).text ?? ''); } catch {}
+      }
+    }
+  }
+
+  // ── Simple output panel helper ────────────────────────────────────────────
+  function startOutput(wrapId, dotId, outputId) {
+    document.getElementById(wrapId).style.display = 'block';
+    document.getElementById(dotId).classList.add('active');
+    const el = document.getElementById(outputId);
+    el.innerHTML = '';
+    return el;
+  }
+
+  function finishOutput(dotId) {
+    document.getElementById(dotId).classList.remove('active');
+  }
+
+  let _text = {};  // accumulate raw text per output id
+
+  function appendChunk(el, id, chunk) {
+    _text[id] = (_text[id] ?? '') + chunk;
+    el.innerHTML = marked.parse(_text[id]);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  // ── Clear panel ───────────────────────────────────────────────────────────
+  function clearPanel(panel) {
+    const map = {
+      resume:  { fields: ['ra-resume','ra-role'], wrap: 'ra-out-wrap', out: 'ra-output', dot: 'ra-dot' },
+      improve: { fields: ['ri-resume','ri-role'], wrap: 'ri-out-wrap', out: 'ri-output', dot: 'ri-dot' },
+      skills:  { fields: ['sg-role','sg-skills'], wrap: 'sg-out-wrap', out: 'sg-output', dot: 'sg-dot' },
+      jd:      { fields: ['jd-resume','jd-desc'], wrap: 'jd-out-wrap', out: 'jd-output', dot: 'jd-dot' },
+    };
+    const m = map[panel]; if (!m) return;
+    m.fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById(m.wrap).style.display = 'none';
+    document.getElementById(m.out).innerHTML = '';
+    delete _text[m.out];
+    finishOutput(m.dot);
+  }
+
+  // ── Resume Analyzer ───────────────────────────────────────────────────────
+  async function analyzeResume() {
+    const resume = document.getElementById('ra-resume').value.trim();
+    if (!resume) return alert('Please paste your resume first.');
+    const target_role = document.getElementById('ra-role').value.trim();
+    const el = startOutput('ra-out-wrap', 'ra-dot', 'ra-output');
+    delete _text['ra-output'];
+    try {
+      await streamFetch('/api/resume/analyze', { resume, target_role }, c => appendChunk(el, 'ra-output', c));
+    } catch (e) { el.innerHTML = `<span style="color:var(--error)">Error: ${e.message}</span>`; }
+    finishOutput('ra-dot');
+  }
+
+  // ── Resume Improver ───────────────────────────────────────────────────────
+  async function improveResume() {
+    const resume = document.getElementById('ri-resume').value.trim();
+    if (!resume) return alert('Please paste your resume first.');
+    const target_role = document.getElementById('ri-role').value.trim();
+    const el = startOutput('ri-out-wrap', 'ri-dot', 'ri-output');
+    delete _text['ri-output'];
+    try {
+      await streamFetch('/api/resume/improve', { resume, target_role }, c => appendChunk(el, 'ri-output', c));
+    } catch (e) { el.innerHTML = `<span style="color:var(--error)">Error: ${e.message}</span>`; }
+    finishOutput('ri-dot');
+  }
+
+  // ── Skills Gap ────────────────────────────────────────────────────────────
+  async function analyzeSkills() {
+    const target_role = document.getElementById('sg-role').value.trim();
+    const current_skills = document.getElementById('sg-skills').value.trim();
+    if (!target_role || !current_skills) return alert('Please fill in both the target role and your current skills.');
+    const experience_level = document.getElementById('sg-level').value;
+    const el = startOutput('sg-out-wrap', 'sg-dot', 'sg-output');
+    delete _text['sg-output'];
+    try {
+      await streamFetch('/api/skills/gap', { target_role, current_skills, experience_level }, c => appendChunk(el, 'sg-output', c));
+    } catch (e) { el.innerHTML = `<span style="color:var(--error)">Error: ${e.message}</span>`; }
+    finishOutput('sg-dot');
+  }
+
+  // ── JD Matcher ────────────────────────────────────────────────────────────
+  async function matchJD() {
+    const resume = document.getElementById('jd-resume').value.trim();
+    const job_description = document.getElementById('jd-desc').value.trim();
+    if (!resume || !job_description) return alert('Please fill in both the resume and job description.');
+    const el = startOutput('jd-out-wrap', 'jd-dot', 'jd-output');
+    delete _text['jd-output'];
+    try {
+      await streamFetch('/api/jd/match', { resume, job_description }, c => appendChunk(el, 'jd-output', c));
+    } catch (e) { el.innerHTML = `<span style="color:var(--error)">Error: ${e.message}</span>`; }
+    finishOutput('jd-dot');
+  }
+
+  // ── Chat (Interview + Career) ─────────────────────────────────────────────
+  const chatHistories = { interview: [], career: [] };
+  const chatStreaming  = { interview: false, career: false };
+
+  function startChat(feature) {
+    chatHistories[feature] = [];
+    const cw = document.getElementById('cw-' + feature);
+    cw.innerHTML = '';
+    enableChatInput(feature, true);
+    sendSystemOpener(feature);
+  }
+
+  async function sendSystemOpener(feature) {
+    const greeting = feature === 'interview'
+      ? "Hello! I'm your AI interview coach. Tell me the role you're interviewing for and your years of experience, and we'll begin your mock interview session."
+      : "Hello! I'm your career advisor. What career challenge or question would you like to explore today?";
+    appendMessage(feature, 'assistant', greeting);
+  }
+
+  function enableChatInput(feature, on) {
+    document.getElementById('ci-' + feature).disabled = !on;
+    document.getElementById('cs-' + feature).disabled = !on;
+  }
+
+  function appendMessage(feature, role, content) {
+    const cw = document.getElementById('cw-' + feature);
+    const empty = cw.querySelector('.chat-empty');
+    if (empty) empty.remove();
+
+    const wrap = document.createElement('div');
+    wrap.className = `msg ${role}`;
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    label.textContent = role === 'user' ? 'You' : (feature === 'interview' ? 'Interviewer' : 'Advisor');
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    if (role === 'assistant') {
+      bubble.innerHTML = marked.parse(content);
+    } else {
+      bubble.textContent = content;
+    }
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    cw.appendChild(wrap);
+    cw.scrollTop = cw.scrollHeight;
+    return bubble;
+  }
+
+  function showTyping(feature, on) {
+    document.getElementById('ti-' + feature).classList.toggle('active', on);
+    const cw = document.getElementById('cw-' + feature);
+    if (on) cw.scrollTop = cw.scrollHeight;
+  }
+
+  async function sendChat(feature) {
+    if (chatStreaming[feature]) return;
+    const input = document.getElementById('ci-' + feature);
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+
+    chatHistories[feature].push({ role: 'user', content: text });
+    appendMessage(feature, 'user', text);
+    showTyping(feature, true);
+    chatStreaming[feature] = true;
+    enableChatInput(feature, false);
+
+    let assistantText = '';
+    let bubble = null;
+
+    try {
+      await streamFetch(
+        '/api/chat',
+        { messages: chatHistories[feature], feature },
+        chunk => {
+          showTyping(feature, false);
+          if (!bubble) {
+            bubble = appendMessage(feature, 'assistant', '');
+          }
+          assistantText += chunk;
+          bubble.innerHTML = marked.parse(assistantText);
+          document.getElementById('cw-' + feature).scrollTop = 9999;
+        }
+      );
+    } catch (e) {
+      showTyping(feature, false);
+      appendMessage(feature, 'assistant', `⚠️ Error: ${e.message}`);
+    }
+
+    chatHistories[feature].push({ role: 'assistant', content: assistantText });
+    showTyping(feature, false);
+    chatStreaming[feature] = false;
+    enableChatInput(feature, true);
+    document.getElementById('ci-' + feature).focus();
+  }
+
+  function endInterview() {
+    if (chatHistories.interview.length === 0) return alert('Start an interview session first.');
+    const input = document.getElementById('ci-interview');
+    input.value = 'That was my last answer. Please end the interview now and give me detailed feedback on my overall performance.';
+    sendChat('interview');
+  }
+
+  // ── Chat input: Enter to send, Shift+Enter for newline ───────────────────
+  ['interview', 'career'].forEach(f => {
+    document.getElementById('ci-' + f).addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChat(f);
+      }
+    });
+  });
+
+  // ── Fetch model name ─────────────────────────────────────────────────────
+  fetch('/api/health').then(r => r.json()).then(d => {
+    if (d.model) document.getElementById('model-name').textContent = d.model;
+  }).catch(() => {});
+</script>
+</body>
+</html>
